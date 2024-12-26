@@ -1,17 +1,24 @@
 import requests
+import json
+import urllib3
 
-BASE_URL = "https://rdb.altlinux.org/api/export/branch_binary_packages"
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+def perform_get_request(url):
+    try:
+        response = requests.get(url, verify=False)
+        response.raise_for_status()
+        return response.text
+    except requests.RequestException as e:
+        print(f"Ошибка при выполнении запроса: {e}")
+        return ""
 
-def fetch_packages(branch: str, arch: str = None):
-    
-    params = {"arch": arch} if arch else {}
-    url = f"{BASE_URL}/{branch}"
-    response = requests.get(url, params=params)
-    if response.status_code == 200:
-        data = response.json()
-        if isinstance(data, dict) and "packages" in data:
-            return data["packages"]
-        else:
-            raise ValueError(f"Unexpected data format: {data}")
-    else:
-        raise ValueError(f"Error fetching packages for branch '{branch}': {response.status_code}")
+def parse_json_structures(json_string):
+    try:
+        return json.loads(json_string)
+    except json.JSONDecodeError as e:
+        print(f"Ошибка при разборе JSON-данных: {e}")
+        return {}
+
+def find_arch(json_string):
+    parsed_json = parse_json_structures(json_string)
+    return list(set(package["arch"] for package in parsed_json.get("packages", [])))

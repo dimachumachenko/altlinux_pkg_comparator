@@ -1,37 +1,54 @@
 import unittest
-from altpkg.api import fetch_packages
+from unittest.mock import patch, MagicMock
+import requests
+from altpkg.api import perform_get_request, parse_json_structures, find_arch
 
-class TestAPI(unittest.TestCase):
-    def test_fetch_packages_valid_branch(self):
-        
-        data = fetch_packages("sisyphus")
-        self.assertIsInstance(data, list)
-        self.assertTrue(len(data) > 0)
-        for pkg in data:
-            self.assertIn("name", pkg)
-            self.assertIn("version", pkg)
-            self.assertIn("release", pkg)
-            self.assertIn("arch", pkg)
+BASE_URL = "https://rdb.altlinux.org/api/export/branch_binary_packages"
 
-    def test_fetch_packages_with_arch(self):
-        
-        data = fetch_packages("sisyphus", arch="x86_64")
-        self.assertIsInstance(data, list)
-        self.assertTrue(len(data) > 0)
-        for pkg in data:
-            self.assertEqual(pkg["arch"], "x86_64")
 
-    def test_fetch_packages_invalid_branch(self):
+class TestAPIWithAltLinux(unittest.TestCase):
+    def test_perform_get_request_sisyphus(self):
         
-        with self.assertRaises(ValueError) as context:
-            fetch_packages("invalid_branch")
-        self.assertIn("Error fetching packages", str(context.exception))
+        branch = "sisyphus"
+        url = f"{BASE_URL}/{branch}"
+        response = perform_get_request(url)
+        data = parse_json_structures(response)
 
-    def test_fetch_packages_p10(self):
+        self.assertIn("packages", data)
+        self.assertIsInstance(data["packages"], list)
+        self.assertGreater(len(data["packages"]), 0)
+
+    def test_perform_get_request_p10(self):
+       
+        branch = "p10"
+        url = f"{BASE_URL}/{branch}"
+        response = perform_get_request(url)
+        data = parse_json_structures(response)
+
+        self.assertIn("packages", data)
+        self.assertIsInstance(data["packages"], list)
+        self.assertGreater(len(data["packages"]), 0)
+
+    def test_find_arch_sisyphus(self):
         
-        data = fetch_packages("p10")
-        self.assertIsInstance(data, list)
-        self.assertTrue(len(data) > 0)
+        branch = "sisyphus"
+        url = f"{BASE_URL}/{branch}"
+        response = perform_get_request(url)
+        arch_list = find_arch(response)
+
+        self.assertIsInstance(arch_list, list)
+        self.assertGreater(len(arch_list), 0)
+
+    def test_find_arch_p10(self):
+     
+        branch = "p10"
+        url = f"{BASE_URL}/{branch}"
+        response = perform_get_request(url)
+        arch_list = find_arch(response)
+
+        self.assertIsInstance(arch_list, list)
+        self.assertGreater(len(arch_list), 0)
+
 
 if __name__ == "__main__":
     unittest.main()

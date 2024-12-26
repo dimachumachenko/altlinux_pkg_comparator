@@ -1,5 +1,6 @@
 import os
 import json
+from packaging import version
 from altpkg.api import perform_get_request, parse_json_structures
 
 def existence_packages(json_sis, json_p10):
@@ -10,9 +11,20 @@ def existence_packages(json_sis, json_p10):
     return result
 
 def single_compare_version(version1, release1, version2, release2):
-    full_version1 = version1 + release1
-    full_version2 = version2 + release2
-    return (full_version1 > full_version2) - (full_version1 < full_version2)
+    
+    full_version1 = f"{version1}-{release1}"  
+    full_version2 = f"{version2}-{release2}"
+    
+    
+    v1 = version.parse(full_version1)
+    v2 = version.parse(full_version2)
+    
+    if v1 > v2:
+        return 1
+    elif v1 < v2:
+        return -1
+    else:
+        return 0
 
 def version_comparison(json_sis, json_p10):
     result = []

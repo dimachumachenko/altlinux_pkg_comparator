@@ -1,5 +1,5 @@
 
-<h1 align="center"> <a href="https://daniilshat.ru/" target="_blank">ALT Linux Package Comparator</a> 
+<h1 align="center"> <a target="_blank">ALT Linux Package Comparator</a> 
 <img src="https://github.com/blackcater/blackcater/raw/main/images/Hi.gif" height="32"/></h1>
 Description
 This Python project provides a command-line utility to compare binary packages between two branches (sisyphus and p10) of the ALT Linux repository. The tool fetches package lists via the ALT Linux public REST API and identifies:
